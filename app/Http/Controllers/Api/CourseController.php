@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Course\StoreCourseRequest;
 use App\Models\Course;
 use Illuminate\Http\Request;
 
@@ -25,9 +26,15 @@ class CourseController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreCourseRequest $request)
     {
-        //
+        $course = $request->user()->courses()->create($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Course created successfully',
+            'data' => $course,
+        ], 201);
     }
 
     /**
