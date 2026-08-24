@@ -7,9 +7,12 @@ use App\Http\Requests\Course\StoreCourseRequest;
 use App\Http\Requests\Course\UpdateCourseRequest;
 use App\Models\Course;
 use Illuminate\Http\Request;
+use App\Traits\ApiResponseTrait;
 
 class CourseController extends Controller
 {
+    use ApiResponseTrait;
+
     /**
      * Display a listing of the resource.
      */
@@ -41,34 +44,47 @@ class CourseController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Course $course)
+    public function show($id)
     {
-        return response()->json([
-            'success' => true,
-            'message' => 'Course retrieved successfully',
-            'data' => $course,
-        ], 200);
+        $course = $this->findCourse($id);
+
+        return $this->successResponse($course, 'Course retrieved successfully');
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCourseRequest $request, Course $course)
+    public function update(UpdateCourseRequest $request, $id)
     {
+        $course = $this->findCourse($id);
+
         $course->update($request->validated());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Course updated successfully',
-            'data' => $course,
-        ], 200);
+        return $this->successResponse($course, 'Course updated successfully');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        $course = $this->findCourse($id);
+
+        $course->delete();
+
+        return $this->successResponse(null, 'Course deleted successfully');
+    }
+
+    private function findCourse($id): Course
+    {
+        $course = Course::find($id);
+
+        if (! $course) {
+            abort(
+                $this->notFoundResponse('Course', $id)
+            );
+        }
+
+        return $course;
     }
 }
