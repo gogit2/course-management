@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Course\StoreCourseRequest;
+use App\Http\Requests\Course\UpdateCourseRequest;
 use App\Models\Course;
 use Illuminate\Http\Request;
 
@@ -52,9 +53,15 @@ class CourseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateCourseRequest $request, Course $course)
     {
-        //
+        $course->update($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Course updated successfully',
+            'data' => $course,
+        ], 200);
     }
 
     /**
