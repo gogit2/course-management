@@ -18,13 +18,11 @@ class CourseController extends Controller
      */
     public function index(Request $request)
     {
-        $courses = Course::query()->paginate(10);
+        $courses = Course::query()
+            ->latest()
+            ->paginate(10);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Courses retrieved successfully',
-            'data' => $courses,
-        ], 200);
+        return $this->successResponse($courses, 'Courses retrieved successfully');
     }
 
     /**
@@ -34,11 +32,7 @@ class CourseController extends Controller
     {
         $course = $request->user()->courses()->create($request->validated());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Course created successfully',
-            'data' => $course,
-        ], 201);
+        return $this->successResponse($course, 'Course created successfully', 201);
     }
 
     /**
