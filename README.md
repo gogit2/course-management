@@ -1,59 +1,109 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Course Management API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A REST API for managing courses, built with Laravel and Laravel Sanctum for
+token-based authentication.
 
-## About Laravel
+## Tech Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP / Laravel 11
+- Laravel Sanctum (API token authentication)
+- MySQL (or any database supported by Laravel)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- User registration and login
+- Token-based authentication (Sanctum)
+- Course CRUD (create, read, update, delete)
+- Consistent JSON response format for success and error cases
 
-## Learning Laravel
+## Getting Started
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### 1. Clone the project
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone <your-repo-url>
+cd course-management
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Install dependencies
 
-## Contributing
+```bash
+composer install
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Set up environment
 
-## Code of Conduct
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Update `.env` with your database details.
 
-## Security Vulnerabilities
+### 4. Run migrations
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+php artisan migrate
+```
 
-## License
+### 5. Start the server
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# course-management
+```bash
+php artisan serve
+```
+
+The API will be available at `http://127.0.0.1:8000/api`.
+
+## API Response Format
+
+All responses follow this shape:
+
+```json
+{
+    "success": true,
+    "message": "Some message",
+    "data": {}
+}
+```
+
+Validation and error responses include an `errors` field:
+
+```json
+{
+    "success": false,
+    "message": "Validation Error",
+    "data": null,
+    "errors": {
+        "field": ["Error message"]
+    }
+}
+```
+
+## Endpoints
+
+### Auth
+
+| Method | Endpoint         | Description             | Auth required |
+|--------|------------------|--------------------------|----------------|
+| POST   | `/api/register`  | Register a new user      | No             |
+| POST   | `/api/login`     | Log in and get a token   | No             |
+| POST   | `/api/logout`    | Revoke the current token | Yes            |
+
+### Courses
+
+| Method | Endpoint             | Description                  | Auth required |
+|--------|-----------------------|-------------------------------|----------------|
+| GET    | `/api/courses`        | List courses (paginated)      | Yes            |
+| POST   | `/api/courses`        | Create a course               | Yes            |
+| GET    | `/api/courses/{id}`   | Show a single course          | Yes            |
+| PUT    | `/api/courses/{id}`   | Update a course (owner only)  | Yes            |
+| DELETE | `/api/courses/{id}`   | Delete a course (owner only)  | Yes            |
+
+## Authentication
+
+After logging in, include the token in the `Authorization` header for
+protected routes:
+
+```
+Authorization: Bearer YOUR_TOKEN_HERE
+```
