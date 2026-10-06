@@ -12,9 +12,16 @@ class CourseAuthorizationTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function createCourseFor(User $user): Course
+    private User $owner;
+
+    private Course $course;
+
+    protected function setUp(): void
     {
-        return $user->courses()->create([
+        parent::setUp();
+
+        $this->owner = User::factory()->create();
+        $this->course = Course::factory()->for($this->owner)->create([
             'title' => 'Original title',
             'price' => 10,
         ]);
@@ -22,51 +29,59 @@ class CourseAuthorizationTest extends TestCase
 
     public function test_owner_can_update_course(): void
     {
-        $owner = User::factory()->create();
-        $course = $this->createCourseFor($owner);
+        Sanctum::actingAs($this->owner);
 
-        Sanctum::actingAs($owner);
-
-        $this->putJson("/api/courses/{$course->id}", ['title' => 'New title'])
+        $this->putJson("/api/courses/{$this->course->id}", ['title' => 'New title'])
             ->assertOk()
             ->assertJsonPath('data.title', 'New title');
     }
 
     public function test_non_owner_cannot_update_course(): void
     {
-        $course = $this->createCourseFor(User::factory()->create());
-
         Sanctum::actingAs(User::factory()->create());
 
-        $this->putJson("/api/courses/{$course->id}", ['title' => 'Hacked'])
+        $this->putJson("/api/courses/{$this->course->id}", [
+            'title' => 'Hacked',
+            'price' => 0,
+        ])
             ->assertForbidden()
-            ->assertJsonPath('success', false);
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('message', 'You are not allowed to update this course');
 
-        $this->assertSame('Original title', $course->fresh()->title);
+        $this->course->refresh();
+        $this->assertSame('Original title', $this->course->title);
+        $this->assertEquals(10, $this->course->price);
     }
 
     public function test_owner_can_delete_course(): void
     {
-        $owner = User::factory()->create();
-        $course = $this->createCourseFor($owner);
+        Sanctum::actingAs($this->owner);
 
-        Sanctum::actingAs($owner);
+        $this->deleteJson("/api/courses/{$this->course->id}")->assertOk();
 
-        $this->deleteJson("/api/courses/{$course->id}")->assertOk();
-
-        $this->assertModelMissing($course);
+        $this->assertModelMissing($this->course);
     }
 
     public function test_non_owner_cannot_delete_course(): void
     {
-        $course = $this->createCourseFor(User::factory()->create());
-
         Sanctum::actingAs(User::factory()->create());
 
-        $this->deleteJson("/api/courses/{$course->id}")
+        $this->deleteJson("/api/courses/{$this->course->id}")
             ->assertForbidden()
-            ->assertJsonPath('success', false);
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('message', 'You are not allowed to delete this course');
 
-        $this->assertModelExists($course);
+        $this->assertModelExists($this->course);
+    }
+
+    public function test_guest_cannot_update_or_delete_course(): void
+    {
+        $this->putJson("/api/courses/{$this->course->id}", ['title' => 'Hacked'])
+            ->assertUnauthorized();
+
+        $this->deleteJson("/api/courses/{$this->course->id}")
+            ->assertUnauthorized();
+
+        $this->assertSame('Original title', $this->course->fresh()->title);
     }
 }
