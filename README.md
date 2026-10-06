@@ -56,17 +56,19 @@ The API will be available at `http://127.0.0.1:8000/api`.
 
 ## API Response Format
 
-All responses follow this shape:
+All responses, including errors (401, 403, 404, 405, 429, 500), follow this
+shape. `errors` is `null` unless there are validation errors:
 
 ```json
 {
     "success": true,
     "message": "Some message",
-    "data": {}
+    "data": {},
+    "errors": null
 }
 ```
 
-Validation and error responses include an `errors` field:
+Validation errors (422) list the messages for each field in `errors`:
 
 ```json
 {

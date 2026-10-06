@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests\Course;
 
+use App\Http\Requests\BaseFormRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 
-class StoreCourseRequest extends FormRequest
+class StoreCourseRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

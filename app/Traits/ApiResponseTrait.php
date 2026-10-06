@@ -13,7 +13,7 @@ trait ApiResponseTrait
             'success' => true,
             'message' => $message,
             'data' => $data,
-            'errors' => [],
+            'errors' => null,
         ], $status);
     }
 
@@ -21,7 +21,7 @@ trait ApiResponseTrait
         string $message,
         int $status = 400,
         mixed $data = null,
-        array $errors = []
+        ?array $errors = null
     ) {
         return response()->json([
             'success' => false,
