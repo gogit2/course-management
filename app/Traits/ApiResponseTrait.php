@@ -27,7 +27,7 @@ trait ApiResponseTrait
             'success' => false,
             'message' => $message,
             'data' => $data,
-            'errors' => [],
+            'errors' => $errors,
         ], $status);
     }
 
