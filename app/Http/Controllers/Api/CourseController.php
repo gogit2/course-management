@@ -52,6 +52,10 @@ class CourseController extends Controller
     {
         $course = $this->findCourse($id);
 
+        if ($request->user()->cannot('update', $course)) {
+            return $this->errorResponse('You are not allowed to update this course', 403);
+        }
+
         $course->update($request->validated());
 
         return $this->successResponse($course, 'Course updated successfully');
@@ -60,9 +64,13 @@ class CourseController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $course = $this->findCourse($id);
+
+        if ($request->user()->cannot('delete', $course)) {
+            return $this->errorResponse('You are not allowed to delete this course', 403);
+        }
 
         $course->delete();
 
